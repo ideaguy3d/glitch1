@@ -1,18 +1,3 @@
-/**
- * Copyright 2016 Google Inc. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 'use strict';
 
 var firebase = require('firebase');
@@ -32,7 +17,6 @@ var mailTransport = nodemailer.createTransport('smtps://'+process.env.GMAIL_USER
 
 
 
-// [START initialize]
 // Initialize the app with a service account, granting admin privileges
 firebase.initializeApp({
   databaseURL: 'https://'+process.env.PROJECT_ID+'.firebaseio.com',
@@ -42,7 +26,7 @@ firebase.initializeApp({
     privateKey: process.env.PRIVATE_KEY
   }
 });
-// [END initialize]
+
 
 // Set our simple Express server to serve up our front-end files
 // http://expressjs.com/en/starter/static-files.html
@@ -52,13 +36,17 @@ app.get("/", function (request, response) {
   response.sendFile(__dirname + '/public/index.html');
 });
 
+
 // Save the date at which we last tried to send a notification
 function updateNotification(uid, postId) {
   var update = {};
+  
   update['/posts/' + postId + '/lastNotificationTimestamp'] =
     firebase.database.ServerValue.TIMESTAMP;
+  
   update['/user-posts/' + uid + '/' + postId + '/lastNotificationTimestamp'] =
     firebase.database.ServerValue.TIMESTAMP;
+  
   firebase.database().ref().update(update);
 }
 
@@ -131,6 +119,7 @@ function startListeners() {
     var postReference = postSnapshot.ref;
     var uid = postSnapshot.val().uid;
     var postId = postSnapshot.key;
+    
     // Update the star count.
     // [START post_value_event_listener]
     postReference.child('stars').on('value', function(dataSnapshot) {
