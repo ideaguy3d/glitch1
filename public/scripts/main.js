@@ -9,12 +9,17 @@ var signOutButton = document.getElementById('sign-out-button');
 var splashPage = document.getElementById('page-splash');
 var addPost = document.getElementById('add-post');
 var addButton = document.getElementById('add');
+//-- UI Tab Sections:
 var recentPostsSection = document.getElementById('recent-posts-list');
 var userPostsSection = document.getElementById('user-posts-list');
 var topUserPostsSection = document.getElementById('top-user-posts-list');
+var amazonLabSection = document.getElementById('amazon-lab-section');
+//-- Tab Navigation Buttons:
 var recentMenuButton = document.getElementById('menu-recent');
 var myPostsMenuButton = document.getElementById('menu-my-posts');
 var myTopPostsMenuButton = document.getElementById('menu-my-top-posts');
+var amazonLabButton = document.getElementById('amazon-lab'); 
+//-- Firebase refs:
 var listeningFirebaseRefs = [];
 
 
@@ -39,7 +44,7 @@ function writeNewPost(uid, username, picture, title, body) {
   var updates = {};
   updates['/posts/' + newPostKey] = postData;
   updates['/user-posts/' + uid + '/' + newPostKey] = postData;
-
+  
   return firebase.database().ref().update(updates);
 }
 
@@ -122,7 +127,6 @@ function createPostElement(postId, title, text, author, authorId, authorPic) {
       (authorPic || './silhouette.jpg') + '")';
 
   // Listen for comments.
-  // [START child_event_listener_recycler]
   var commentsRef = firebase.database().ref('post-comments/' + postId);
   commentsRef.on('child_added', function(data) {
     addCommentElement(postElement, data.key, data.val().text, data.val().author);
@@ -135,15 +139,13 @@ function createPostElement(postId, title, text, author, authorId, authorPic) {
   commentsRef.on('child_removed', function(data) {
     deleteComment(postElement, data.key);
   });
-  // [END child_event_listener_recycler]
 
   // Listen for likes counts.
-  // [START post_value_event_listener]
   var starCountRef = firebase.database().ref('posts/' + postId + '/starCount');
   starCountRef.on('value', function(snapshot) {
     updateStarCount(postElement, snapshot.val());
   });
-  // [END post_value_event_listener]
+  
 
   // Listen for the starred status.
   var starredStatusRef = firebase.database().ref('posts/' + postId + '/stars/' + uid)
@@ -365,10 +367,14 @@ function showSection(sectionElement, buttonElement) {
   recentPostsSection.style.display = 'none';
   userPostsSection.style.display = 'none';
   topUserPostsSection.style.display = 'none';
+  amazonLabSection.style.display = 'none';
+  
   addPost.style.display = 'none';
+  
   recentMenuButton.classList.remove('is-active');
   myPostsMenuButton.classList.remove('is-active');
   myTopPostsMenuButton.classList.remove('is-active');
+  amazonLabButton.classList.remove('is-active'); 
 
   if (sectionElement) {
     sectionElement.style.display = 'block';
@@ -423,11 +429,18 @@ window.addEventListener('load', // param 1
     myTopPostsMenuButton.onclick = function() {
       showSection(topUserPostsSection, myTopPostsMenuButton);
     };
+    amazonLabButton.onclick = function() {
+      showSection(amazonLabSection, amazonLabButton); 
+    };
+  
+    // "Create New Posts" button:
     addButton.onclick = function() {
       showSection(addPost);
       messageInput.value = '';
       titleInput.value = '';
     };
+  
+    // activate the recent post lists section 
     recentMenuButton.onclick();
   },
   // param 3
