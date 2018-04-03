@@ -1,5 +1,5 @@
 # Initial front end for my day jobs' API backend. 
-I just need a quite UI to make requests to our api, March2018 ^_^
+I just need a quick UI to make requests to our api, April 2018 ^_^
 
 # Firebase Database Quickstart
 This app provides a useful starting point for building your own web app using Firebase, Google's cloud backend as a service.

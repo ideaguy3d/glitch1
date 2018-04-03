@@ -62,7 +62,7 @@
 
   <!-- Splash screen -->
   <section id="page-splash">
-    <h3 class="logo">LAB 916</h3>
+    <h3 class="logo">LAB 916 reporting</h3>
     <h4>The front end for our back end api</h4>
     <div>
       <button id="sign-in-button" class="mdl-button--raised mdl-button mdl-js-button mdl-js-ripple-effect"><i class="material-icons">account_circle</i> Sign in with Google</button>
@@ -73,11 +73,11 @@
   <header class="header mdl-layout__header mdl-color-text--white mdl-color--light-blue-700">
     <!-- Top most bar containing logo & signout button -->
     <div class="mdl-layout__header-row titlebar">
-      <h3 class="logo">LAB 916</h3>
+      <h3 class="logo">LAB 916 reporting</h3>
       <button id="sign-out-button" class="mdl-button--raised mdl-button mdl-js-button mdl-js-ripple-effect"><i class="material-icons">account_circle</i> Sign out</button>
     </div>
 
-    <!-- Navigation Bar -->
+    <!-- Tabs Navigation Bar -->
     <div class="tab mdl-layout__header-row mdl-color--light-blue-600">
       <div class="mdl-tab">
         <div id="menu-recent" class="mdl-layout__tab is-active mdl-button mdl-js-button mdl-js-ripple-effect">
@@ -89,9 +89,11 @@
         <div id="menu-my-top-posts" class="mdl-layout__tab mdl-button mdl-js-button mdl-js-ripple-effect">
           <i class="material-icons">trending_up</i> My top posts
         </div>
-        <div id="amazon-sandbox" class="mdl-layout__tab mdl-button mdl-js-button mdl-js-ripple-effect">
-          <i class="material-icons">mode_edit</i>Amazon Requests:
+        <div id="amazon-lab" class="mdl-layout__tab mdl-button mdl-js-button mdl-js-ripple-effect">
+          <i class="material-icons">assessment</i>Amazon Requests:
         </div>
+        
+        <!-- new post btn -->
         <button class="mdl-button mdl-js-button mdl-button--fab mdl-color--amber-400 mdl-shadow--4dp mdl-js-ripple-effect" id="add">
           <i class="material-icons">mode_edit</i>
         </button>
@@ -100,7 +102,6 @@
   </header>
 
   <main class="mdl-layout__content mdl-color--grey-100">
-
     <!-- the "Add Post" form -->
     <section class="mdl-grid content" id="add-post" style="display:none">
       <div class="mdl-cell mdl-cell--12-col mdl-grid">
@@ -130,18 +131,23 @@
       </div>
     </section>
 
-    <!-- the list of recent posts -->
+    <!-- SECTION: the list of recent posts -->
     <section class="mdl-grid content" id="recent-posts-list" style="display:none">
       <div class="posts-container mdl-cell mdl-cell--12-col mdl-grid"></div>
     </section>
 
-    <!-- the list of user's posts -->
+    <!-- SECTION: the list of user's posts -->
     <section class="mdl-grid content" id="user-posts-list" style="display:none">
       <div class="posts-container mdl-cell mdl-cell--12-col mdl-grid"></div>
     </section>
 
-    <!-- the list of users' top posts -->
+    <!-- SECTION: the list of users' top posts -->
     <section class="mdl-grid content" id="top-user-posts-list" style="display:none">
+      <div class="posts-container mdl-cell mdl-cell--12-col mdl-grid"></div>
+    </section>
+    
+    <!-- SECTION: the Amazon Ads API Lab -->
+    <section class="mdl-grid content" id="amazon-lab-section" style="display:none">
       <div class="posts-container mdl-cell mdl-cell--12-col mdl-grid"></div>
     </section>
   </main>
