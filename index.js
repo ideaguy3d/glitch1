@@ -28,38 +28,39 @@ firebase.initializeApp({
 });
 
 
-// Set our simple Express server to serve up our front-end files
-// http://expressjs.com/en/starter/static-files.html
+// Set our simple Express server to serve up our front-end files, http://expressjs.com/en/starter/static-files.html
 app.use(express.static('public'));
 // http://expressjs.com/en/starter/basic-routing.html
 app.get("/", function (request, response) {
   response.sendFile(__dirname + '/public/index.html');
 });
+app.get("/lab1", function (request, response) {
+  response.sendFile(__dirname + '/public/t1.html');
+}); 
 
 
 // Save the date at which we last tried to send a notification
 function updateNotification(uid, postId) {
   var update = {};
   
-  update['/posts/' + postId + '/lastNotificationTimestamp'] =
-    firebase.database.ServerValue.TIMESTAMP;
+  update['/posts/' + postId + '/lastNotificationTimestamp'] = firebase.database.ServerValue.TIMESTAMP;
   
-  update['/user-posts/' + uid + '/' + postId + '/lastNotificationTimestamp'] =
-    firebase.database.ServerValue.TIMESTAMP;
+  update['/user-posts/' + uid + '/' + postId + '/lastNotificationTimestamp'] = firebase.database.ServerValue.TIMESTAMP;
   
   firebase.database().ref().update(update);
 }
 
+
 /**
  * Send a new star notification email to the user with the given UID.
- */
-// [START single_value_read]
+**/
 function sendNotificationToUser(uid, postId) {
   // Fetch the user's email.
   var userRef = firebase.database().ref('/users/' + uid);
   userRef.once('value').then(function(snapshot) {
     var email = snapshot.val().email;
     var postRef = firebase.database().ref('/posts/' + postId);
+    
     postRef.once('value').then(function(thepost) {
       if(!thepost.val().lastNotificationTimestamp || thepost.val().lastNotificationTimestamp>serverStartTime){ // Stop notifications for old stars
         // Send the email to the user.
@@ -78,7 +79,7 @@ function sendNotificationToUser(uid, postId) {
     console.log('Failed to send notification to user:', error);
   });
 }
-// [END single_value_read]
+
 
 
 /**
@@ -100,7 +101,6 @@ function sendNotificationEmail(email) {
 /**
  * Update the star count.
  */
-// [START post_stars_transaction]
 function updateStarCount(postRef) {
   postRef.transaction(function(post) {
     if (post) {
@@ -109,7 +109,7 @@ function updateStarCount(postRef) {
     return post;
   });
 }
-// [END post_stars_transaction]
+
 
 /**
  * Keep the likes count updated and send email notifications for new likes.
@@ -121,25 +121,21 @@ function startListeners() {
     var postId = postSnapshot.key;
     
     // Update the star count.
-    // [START post_value_event_listener]
     postReference.child('stars').on('value', function(dataSnapshot) {
       updateStarCount(postReference);
-      // [START_EXCLUDE]
       updateStarCount(firebase.database().ref('user-posts/' + uid + '/' + postId));
-      // [END_EXCLUDE]
     }, function(error) {
       console.log('Failed to add "value" listener at /posts/' + postId + '/stars node:', error);
     });
-    // [END post_value_event_listener]
+    
     // Send email to author when a new star is received.
-    // [START child_event_listener_recycler]
     postReference.child('stars').on('child_added', function(dataSnapshot) {
       sendNotificationToUser(uid, postId);
     }, function(error) {
       console.log('Failed to add "child_added" listener at /posts/' + postId + '/stars node:', error);
     });
-    // [END child_event_listener_recycler]
   });
+  
   console.log('New star notifier started...');
   console.log('Likes count updater started...');
 }
