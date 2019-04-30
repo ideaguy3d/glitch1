@@ -1,60 +1,81 @@
-// Built on top of by Julius Alvarado :)
 
-'use strict';
+// I NEED YOUR HELP WITH THESE !!! ^_^ 
+
+// https://firebase.google.com/docs/reference/node
+// https://developers.google.com/maps/documentation/javascript/tutorial
+// https://developers.google.com/maps/documentation/javascript/reference
+
 
 var firebase = require('firebase');
 var nodemailer = require('nodemailer');
 var schedule = require('node-schedule');
 var Promise = require('promise');
 var escape = require('escape-html');
-var express = require('express');
 var http = require('http'); 
-// The Express App
-var app = express();
 var serverStartTime = Math.floor(new Date() / 1);
+
+
+// init project
+var express = require('express');
+var app = express();
+
+// enable CORS (https://en.wikipedia.org/wiki/Cross-origin_resource_sharing)
+// so that your API is remotely testable by FCC 
+var cors = require('cors');
+app.use(cors({optionSuccessStatus: 200}));  // some legacy browsers choke on 204
+
+// http://expressjs.com/en/starter/static-files.html
+app.use(express.static('public'));
 
 // Configure the email transport using the default SMTP transport and a GMail account.
 // See: https://nodemailer.com/
 // For other types of transports (Amazon SES, Sendgrid...) see https://nodemailer.com/2-0-0-beta/setup-transporter/
 var mailTransport = nodemailer.createTransport('smtps://'+process.env.GMAIL_USERNAME+'%40gmail.com:'
                                                +process.env.GMAIL_PASSWORD+'@smtp.gmail.com');
-var config = {
-    apiKey: "AIzaSyCmP0EGaJXE92fU4AwLSSeP4Y8TOc2u_xU",
-    authDomain: "maps1-408.firebaseapp.com",
-    databaseURL: "https://maps1-408.firebaseio.com",
-    projectId: "maps1-408"
-  };
+
+// http://expressjs.com/en/starter/basic-routing.html
+app.get("/", function (req, res) {
+  res.sendFile(__dirname + '/views/index.html');
+});
+
+// firebaseNode.on (function(){  }); 
+
+// https://ahead-oregano.glitch.me/api/hello
+
+// document.getElementByID()
+
+// your first API endpoint... 
+app.get("/api/hello", function (req, res) {
+  
+  res.json({
+    greeting: 'hello API',
+    user1location: "10.654, 855.2354",
+    user2location: "52.124, 23.98"
+  });
+
+});
+
+
+app.get("/api/timestamp/:date_string?", function (req, res) {
+  
+
+});
+
+
+//--------------------------------------------------------------------
+// ---- THE FIREBASE NODE.JS API CLIENT / ADMIN CODE !!!!!!!!!!! ----
+//--------------------------------------------------------------------
 
 // [START initialize]
 // Initialize the app with a service account, granting admin privileges
 firebase.initializeApp({
-  apiKey: "AIzaSyCmP0EGaJXE92fU4AwLSSeP4Y8TOc2u_xU",
-  authDomain: "maps1-408.firebaseapp.com",
   databaseURL: "https://maps1-408.firebaseio.com",
-  storageBucket: "maps1-408.appspot.com"
-  
+  serviceAccount: {
+        projectId: process.env.PROJECT_ID,
+        clientEmail: process.env.CLIENT_EMAIL,
+        privateKey: process.env.PRIVATE_KEY
+    }  
 });
-
-/*  
-serviceAccount: {
-    projectId: process.env.PROJECT_ID,
-    clientEmail: process.env.CLIENT_EMAIL,
-    privateKey: process.env.PRIVATE_KEY
-  }
-*/
-// [END initialize]
-
-
-// Set our simple Express server to serve up our front-end files
-// http://expressjs.com/en/starter/static-files.html
-app.use(express.static('public'));
-
-
-// http://expressjs.com/en/starter/basic-routing.html
-app.get("/", function (request, response) {
-  response.sendFile(__dirname + '/public/index.html');
-});
-
 
 // Save the date at which we last tried to send a notification
 function updateNotification(uid, postId){
@@ -95,7 +116,6 @@ function sendNotificationToUser(uid, postId) {
   });
 }
 // [END single_value_read]
-
 
 /**
  * Send the new star notification email to the given email.
@@ -161,7 +181,19 @@ function startListeners() {
 // Start the Firebase server
 startListeners();
 
-// Listen for HTTP requests
+
+
+
+
+
+
+
+
+
+
+
+
+// listen for requests :)
 var listener = app.listen(process.env.PORT, function () {
   console.log('Your app is listening on port ' + listener.address().port);
 });
