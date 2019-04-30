@@ -9,23 +9,18 @@ var signOutButton = document.getElementById('sign-out-button');
 var splashPage = document.getElementById('page-splash');
 var addPost = document.getElementById('add-post');
 var addButton = document.getElementById('add');
-//-- UI Tab Sections:
 var recentPostsSection = document.getElementById('recent-posts-list');
 var userPostsSection = document.getElementById('user-posts-list');
 var topUserPostsSection = document.getElementById('top-user-posts-list');
-var amazonLabSection = document.getElementById('amazon-lab-section');
-//-- Tab Navigation Buttons:
 var recentMenuButton = document.getElementById('menu-recent');
 var myPostsMenuButton = document.getElementById('menu-my-posts');
 var myTopPostsMenuButton = document.getElementById('menu-my-top-posts');
-var amazonLabButton = document.getElementById('amazon-lab'); 
-//-- Firebase refs:
 var listeningFirebaseRefs = [];
-
 
 /**
  * Saves a new post to the Firebase DB.
-**/
+ */
+// [START write_fan_out]
 function writeNewPost(uid, username, picture, title, body) {
   // A post entry.
   var postData = {
@@ -44,14 +39,15 @@ function writeNewPost(uid, username, picture, title, body) {
   var updates = {};
   updates['/posts/' + newPostKey] = postData;
   updates['/user-posts/' + uid + '/' + newPostKey] = postData;
-  
+
   return firebase.database().ref().update(updates);
 }
-
+// [END write_fan_out]
 
 /**
  * Star/unstar post.
-**/
+ */
+// [START post_stars_transaction]
 function toggleStar(postRef, uid) {
   postRef.transaction(function(post) {
     if (post) {
@@ -69,11 +65,11 @@ function toggleStar(postRef, uid) {
     return post;
   });
 }
-
+// [END post_stars_transaction]
 
 /**
- * Creates an HTML post element (a literal UI component via mdl).
-**/
+ * Creates a post element.
+ */
 function createPostElement(postId, title, text, author, authorId, authorPic) {
   var uid = firebase.auth().currentUser.uid;
 
@@ -110,7 +106,7 @@ function createPostElement(postId, title, text, author, authorId, authorPic) {
   var div = document.createElement('div');
   div.innerHTML = html;
   var postElement = div.firstChild;
-  if (componentHandler) { // perhaps an mdl obj? 
+  if (componentHandler) {
     componentHandler.upgradeElements(postElement.getElementsByClassName('mdl-textfield')[0]);
   }
 
@@ -127,6 +123,7 @@ function createPostElement(postId, title, text, author, authorId, authorPic) {
       (authorPic || './silhouette.jpg') + '")';
 
   // Listen for comments.
+  // [START child_event_listener_recycler]
   var commentsRef = firebase.database().ref('post-comments/' + postId);
   commentsRef.on('child_added', function(data) {
     addCommentElement(postElement, data.key, data.val().text, data.val().author);
@@ -139,13 +136,15 @@ function createPostElement(postId, title, text, author, authorId, authorPic) {
   commentsRef.on('child_removed', function(data) {
     deleteComment(postElement, data.key);
   });
+  // [END child_event_listener_recycler]
 
   // Listen for likes counts.
+  // [START post_value_event_listener]
   var starCountRef = firebase.database().ref('posts/' + postId + '/starCount');
   starCountRef.on('value', function(snapshot) {
     updateStarCount(postElement, snapshot.val());
   });
-  
+  // [END post_value_event_listener]
 
   // Listen for the starred status.
   var starredStatusRef = firebase.database().ref('posts/' + postId + '/stars/' + uid)
@@ -179,10 +178,9 @@ function createPostElement(postId, title, text, author, authorId, authorPic) {
   return postElement;
 }
 
-
 /**
  * Writes a new comment for the given post.
-**/
+ */
 function createNewComment(postId, username, uid, text) {
   firebase.database().ref('post-comments/' + postId).push({
     text: text,
@@ -191,10 +189,9 @@ function createNewComment(postId, username, uid, text) {
   });
 }
 
-
 /**
  * Updates the starred status of the post.
-**/
+ */
 function updateStarredByCurrentUser(postElement, starred) {
   if (starred) {
     postElement.getElementsByClassName('starred')[0].style.display = 'inline-block';
@@ -205,18 +202,16 @@ function updateStarredByCurrentUser(postElement, starred) {
   }
 }
 
-
 /**
  * Updates the number of stars displayed for a post.
-**/
+ */
 function updateStarCount(postElement, nbStart) {
   postElement.getElementsByClassName('star-count')[0].innerText = nbStart;
 }
 
-
 /**
- * Creates an HTML comment element and adds it to the given postElement.
-**/
+ * Creates a comment element and adds it to the given postElement.
+ */
 function addCommentElement(postElement, id, text, author) {
   var comment = document.createElement('div');
   comment.classList.add('comment-' + id);
@@ -228,29 +223,26 @@ function addCommentElement(postElement, id, text, author) {
   commentsContainer.appendChild(comment);
 }
 
-
 /**
  * Sets the comment's values in the given postElement.
-**/
+ */
 function setCommentValues(postElement, id, text, author) {
   var comment = postElement.getElementsByClassName('comment-' + id)[0];
   comment.getElementsByClassName('comment')[0].innerText = text;
   comment.getElementsByClassName('fp-username')[0].innerText = author;
 }
 
-
 /**
  * Deletes the comment of the given ID in the given postElement.
-**/
+ */
 function deleteComment(postElement, id) {
   var comment = postElement.getElementsByClassName('comment-' + id)[0];
   comment.parentElement.removeChild(comment);
 }
 
-
 /**
  * Starts listening for new posts and populates posts lists.
-**/
+ */
 function startDatabaseQueries() {
   // [START my_top_posts_query]
   var myUserId = firebase.auth().currentUser.uid;
@@ -284,7 +276,8 @@ function startDatabaseQueries() {
 
 /**
  * Writes the user's data to the database.
-**/
+ */
+// [START basic_write]
 function writeUserData(userId, name, email, imageUrl) {
   firebase.database().ref('users/' + userId).set({
     username: name,
@@ -292,11 +285,11 @@ function writeUserData(userId, name, email, imageUrl) {
     profile_picture : imageUrl
   });
 }
-
+// [END basic_write]
 
 /**
  * Cleanups the UI and removes all Firebase listeners.
-**/
+ */
 function cleanupUi() {
   // Remove all previously displayed posts.
   topUserPostsSection.getElementsByClassName('posts-container')[0].innerHTML = '';
@@ -310,18 +303,15 @@ function cleanupUi() {
   listeningFirebaseRefs = [];
 }
 
-
 /**
- * The ID of the currently signed-in User. We keep track of this to detect Auth state change 
- * events that are just programmatic token refreshes, but not a User status change.
-**/
+ * The ID of the currently signed-in User. We keep track of this to detect Auth state change events that are just
+ * programmatic token refresh but not a User status change.
+ */
 var currentUID;
 
-
 /**
- * Triggers every time there is a change in the Firebase auth state 
- * (i.e. user signed-in or user signed out).
-**/
+ * Triggers every time there is a change in the Firebase auth state (i.e. user signed-in or user signed out).
+ */
 function onAuthStateChanged(user) {
   // We ignore token refresh events.
   if (user && currentUID === user.uid || !user && currentUID === null) {
@@ -340,11 +330,9 @@ function onAuthStateChanged(user) {
   }
 }
 
-
-
 /**
  * Creates a new post for the current user.
-**/
+ */
 function newPostForCurrentUser(title, text) {
   // [START single_value_read]
   var userId = firebase.auth().currentUser.uid;
@@ -359,22 +347,17 @@ function newPostForCurrentUser(title, text) {
   // [END single_value_read]
 }
 
-
-/** tabs? 
+/**
  * Displays the given section element and changes styling of the given button.
-**/
+ */
 function showSection(sectionElement, buttonElement) {
   recentPostsSection.style.display = 'none';
   userPostsSection.style.display = 'none';
   topUserPostsSection.style.display = 'none';
-  amazonLabSection.style.display = 'none';
-  
   addPost.style.display = 'none';
-  
   recentMenuButton.classList.remove('is-active');
   myPostsMenuButton.classList.remove('is-active');
   myTopPostsMenuButton.classList.remove('is-active');
-  amazonLabButton.classList.remove('is-active'); 
 
   if (sectionElement) {
     sectionElement.style.display = 'block';
@@ -384,64 +367,50 @@ function showSection(sectionElement, buttonElement) {
   }
 }
 
-
 // Bindings on load.
-window.addEventListener('load', // param 1
-  //param 2
-  function() {
-    // Bind Sign in button.
-    signInButton.addEventListener('click', function() {
-      var provider = new firebase.auth.GoogleAuthProvider();
-      firebase.auth().signInWithPopup(provider);
-    });
+window.addEventListener('load', function() {
+  // Bind Sign in button.
+  signInButton.addEventListener('click', function() {
+    var provider = new firebase.auth.GoogleAuthProvider();
+    firebase.auth().signInWithPopup(provider);
+  });
 
-    // Bind Sign out button.
-    signOutButton.addEventListener('click', function() {
-      firebase.auth().signOut();
-    });
+  // Bind Sign out button.
+  signOutButton.addEventListener('click', function() {
+    firebase.auth().signOut();
+  });
 
-    // Listen for auth state changes
-    firebase.auth().onAuthStateChanged(onAuthStateChanged);
+  // Listen for auth state changes
+  firebase.auth().onAuthStateChanged(onAuthStateChanged);
 
-    // Saves message on form submit.
-    messageForm.onsubmit = function(e) {
-      e.preventDefault();
-      var text = messageInput.value;
-      var title = titleInput.value;
-      if (text && title) {
-        newPostForCurrentUser(title, text).then(function() {
-          myPostsMenuButton.click();
-        });
-        messageInput.value = '';
-        titleInput.value = '';
-      }
-    };
-
-    //------------------------------------------------------------------
-    // Bind menu buttons. THESE ARE THE "TABS" <------------------------
-    //------------------------------------------------------------------
-    recentMenuButton.onclick = function() {
-      showSection(recentPostsSection, recentMenuButton);
-    };
-    myPostsMenuButton.onclick = function() {
-      showSection(userPostsSection, myPostsMenuButton);
-    };
-    myTopPostsMenuButton.onclick = function() {
-      showSection(topUserPostsSection, myTopPostsMenuButton);
-    };
-    amazonLabButton.onclick = function() {
-      showSection(amazonLabSection, amazonLabButton); 
-    };
-  
-    // "Create New Posts" button:
-    addButton.onclick = function() {
-      showSection(addPost);
+  // Saves message on form submit.
+  messageForm.onsubmit = function(e) {
+    e.preventDefault();
+    var text = messageInput.value;
+    var title = titleInput.value;
+    if (text && title) {
+      newPostForCurrentUser(title, text).then(function() {
+        myPostsMenuButton.click();
+      });
       messageInput.value = '';
       titleInput.value = '';
-    };
-  
-    // activate the recent post lists section 
-    recentMenuButton.onclick();
-  },
-  // param 3
-  false);
+    }
+  };
+
+  // Bind menu buttons.
+  recentMenuButton.onclick = function() {
+    showSection(recentPostsSection, recentMenuButton);
+  };
+  myPostsMenuButton.onclick = function() {
+    showSection(userPostsSection, myPostsMenuButton);
+  };
+  myTopPostsMenuButton.onclick = function() {
+    showSection(topUserPostsSection, myTopPostsMenuButton);
+  };
+  addButton.onclick = function() {
+    showSection(addPost);
+    messageInput.value = '';
+    titleInput.value = '';
+  };
+  recentMenuButton.onclick();
+}, false);
