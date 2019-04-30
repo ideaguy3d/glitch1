@@ -1,5 +1,7 @@
 
-# API Project: Timestamp Microservice for FCC
+# Firebase Database Quickstart
+This app provides a useful starting point for building your own web app using Firebase, Google's cloud backend as a service.
+
 
 ### User stories :
 
