@@ -1,0 +1,8 @@
+**/node_modules
+.tmp
+.sass-cache
+.idea
+.firebase/hosting.ZGlzdA.cache
+dist
+config.txt
+api/maps1-408-firebase-adminsdk-b0r4e-707a7b4def.json
